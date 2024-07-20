@@ -3,6 +3,7 @@ package cs.empire.trading_companion.security.services;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +15,9 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class JWTService {
-    private static final String secret = "B92F6E8C08F342EF2C3BD88556987901EB72B0A5406879DBECA6C6F6AEB6CE68E4D4BBE06B9C69014286D1CA2E9D9515FB8ED2CBB14959C8F61202C4B19F07F6";
+
+    @Value("${jwt.secret}")
+    private String secret;
     private static final Long validDuration = TimeUnit.MINUTES.toMillis(30);
 
     private SecretKey generateKey() {
