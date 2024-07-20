@@ -1,0 +1,51 @@
+package cs.empire.trading_companion.security.services;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
+
+import javax.crypto.SecretKey;
+import java.time.Instant;
+import java.util.Base64;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
+@Service
+public class JWTService {
+    private static final String secret = "B92F6E8C08F342EF2C3BD88556987901EB72B0A5406879DBECA6C6F6AEB6CE68E4D4BBE06B9C69014286D1CA2E9D9515FB8ED2CBB14959C8F61202C4B19F07F6";
+    private static final Long validDuration = TimeUnit.MINUTES.toMillis(30);
+
+    private SecretKey generateKey() {
+        byte[] decodedKey = Base64.getDecoder().decode(secret);
+        return Keys.hmacShaKeyFor(decodedKey);
+    }
+
+    private Claims getClaims(String token) {
+       return Jwts.parser()
+                .verifyWith(generateKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
+    public String generateToken(UserDetails userDetails) {
+        return Jwts.builder()
+                .subject(userDetails.getUsername())
+                .issuedAt(Date.from(Instant.now()))
+                .expiration(Date.from(Instant.now().plusMillis(validDuration)))
+                .signWith(generateKey())
+                .compact();
+    }
+
+    public String extractUsername(String token) {
+        Claims claims = getClaims(token);
+        return claims.getSubject();
+    }
+
+    public boolean isTokenValid(String token) {
+        Claims claims = getClaims(token);
+        return claims.getExpiration().after(Date.from(Instant.now()));
+    }
+}
