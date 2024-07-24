@@ -35,7 +35,7 @@ public class JWTService {
 
     public String generateToken(UserDetails userDetails) {
         return Jwts.builder()
-                .subject(userDetails.getUsername())
+                .claim("username",userDetails.getUsername())
                 .issuedAt(Date.from(Instant.now()))
                 .expiration(Date.from(Instant.now().plusMillis(validDuration)))
                 .signWith(generateKey())
