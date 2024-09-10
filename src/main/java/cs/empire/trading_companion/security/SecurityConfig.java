@@ -36,7 +36,6 @@ public class SecurityConfig {
             registry.requestMatchers("/auth/**").permitAll();
             registry.anyRequest().authenticated();
         })
-                .formLogin(AbstractAuthenticationFilterConfigurer::permitAll)
                 .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
