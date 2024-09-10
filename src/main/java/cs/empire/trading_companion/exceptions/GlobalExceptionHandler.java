@@ -17,7 +17,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({UserAlreadyExistsException.class})
     public ResponseEntity<Object> handleUserAlreadyExistsException (UserAlreadyExistsException exception) {
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+                .status(HttpStatus.CONFLICT)
+                .body(exception.getMessage());
+    }
+
+    @ExceptionHandler({InvalidFormatException.class})
+    public ResponseEntity<Object> handleInvalidFormatException (InvalidFormatException exception) {
+        return ResponseEntity
+                .status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body(exception.getMessage());
     }
 }
