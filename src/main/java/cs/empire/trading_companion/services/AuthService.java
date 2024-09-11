@@ -23,15 +23,13 @@ public class AuthService {
     private final AuthRepository authRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
     private final JWTService jwtService;
     private final MyUserDetailsService userDetailsService;
 
-    public AuthService(AuthRepository authRepository, UserMapper userMapper, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JWTService jwtService, MyUserDetailsService userDetailsService) {
+    public AuthService(AuthRepository authRepository, UserMapper userMapper, PasswordEncoder passwordEncoder, JWTService jwtService, MyUserDetailsService userDetailsService) {
         this.authRepository = authRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
-        this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
     }
@@ -40,9 +38,10 @@ public class AuthService {
         Optional<UserEntity> foundUser = authRepository.findByUsername(loginRequestDTO.getUsername());
 
         if (foundUser.isPresent()) {
-            String requestEncodedPassword = passwordEncoder.encode(loginRequestDTO.getPassword());
+            String rawPassword = loginRequestDTO.getPassword();
+            String encodedPasswordFromDB = foundUser.get().getPassword();
 
-            if (requestEncodedPassword.equals(foundUser.get().getPassword())) {
+            if (passwordEncoder.matches(rawPassword, encodedPasswordFromDB)) {
                 LoginResponseDTO loginResponse = new LoginResponseDTO();
                 String token = jwtService.generateToken(userDetailsService.loadUserByUsername(loginRequestDTO.getUsername()));
                 loginResponse.setToken(token);
@@ -50,8 +49,9 @@ public class AuthService {
             }
         }
 
-        throw new UserNotFoundException("We couldn't find an user with those credentials. Please try again!");
+        throw new UserNotFoundException("We couldn't find a user with those credentials. Please try again!");
     }
+
 
     public UserDTO saveUser(UserDTO userDTO) throws UserAlreadyExistsException{
         Optional<UserEntity> foundUserByUsername = authRepository.findByUsername(userDTO.getUsername());
