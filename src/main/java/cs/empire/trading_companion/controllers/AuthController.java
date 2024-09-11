@@ -2,6 +2,7 @@ package cs.empire.trading_companion.controllers;
 
 import cs.empire.trading_companion.dtos.LoginRequestDTO;
 import cs.empire.trading_companion.dtos.LoginResponseDTO;
+import cs.empire.trading_companion.dtos.RegisterResponseDTO;
 import cs.empire.trading_companion.dtos.UserDTO;
 import cs.empire.trading_companion.services.AuthService;
 import org.springframework.http.ResponseEntity;
@@ -27,8 +28,8 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserDTO> registerUser(@RequestBody UserDTO userDTO) {
-        UserDTO savedUser = authService.saveUser(userDTO);
-        return ResponseEntity.ok(savedUser);
+    public ResponseEntity<RegisterResponseDTO> registerUser(@RequestBody UserDTO userDTO) {
+        RegisterResponseDTO userToken = authService.registerUser(userDTO);
+        return ResponseEntity.ok(userToken);
     }
 }
