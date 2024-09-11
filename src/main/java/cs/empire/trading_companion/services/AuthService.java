@@ -2,6 +2,7 @@ package cs.empire.trading_companion.services;
 
 import cs.empire.trading_companion.dtos.LoginRequestDTO;
 import cs.empire.trading_companion.dtos.LoginResponseDTO;
+import cs.empire.trading_companion.dtos.RegisterResponseDTO;
 import cs.empire.trading_companion.dtos.UserDTO;
 import cs.empire.trading_companion.entities.UserEntity;
 import cs.empire.trading_companion.exceptions.InvalidFormatException;
@@ -52,6 +53,13 @@ public class AuthService {
         throw new UserNotFoundException("We couldn't find a user with those credentials. Please try again!");
     }
 
+    public RegisterResponseDTO registerUser(UserDTO registerUserDTO) {
+        RegisterResponseDTO registerResponse = new RegisterResponseDTO();
+        saveUser(registerUserDTO);
+        String token = jwtService.generateToken(userDetailsService.loadUserByUsername(registerUserDTO.getUsername()));
+        registerResponse.setToken(token);
+        return registerResponse;
+    }
 
     public UserDTO saveUser(UserDTO userDTO) throws UserAlreadyExistsException{
         Optional<UserEntity> foundUserByUsername = authRepository.findByUsername(userDTO.getUsername());
@@ -71,6 +79,7 @@ public class AuthService {
         String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
         user.setPassword(encodedPassword);
         UserEntity savedUser = authRepository.save(user);
+
         return userMapper.userEntityToUserDto(savedUser);
     }
 
