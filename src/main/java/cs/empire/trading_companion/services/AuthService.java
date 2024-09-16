@@ -12,7 +12,6 @@ import cs.empire.trading_companion.mappers.UserMapper;
 import cs.empire.trading_companion.repositories.AuthRepository;
 import cs.empire.trading_companion.security.services.JWTService;
 import cs.empire.trading_companion.security.services.MyUserDetailsService;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -37,17 +36,24 @@ public class AuthService {
 
     public LoginResponseDTO loginUser(LoginRequestDTO loginRequestDTO) {
         Optional<UserEntity> foundUser = authRepository.findByUsername(loginRequestDTO.getUsername());
+        Optional<UserEntity> foundUserByEmail = authRepository.findByEmail(loginRequestDTO.getUsername());
+
+        String rawPassword = loginRequestDTO.getPassword();
+        String encodedPasswordFromDB = null;
 
         if (foundUser.isPresent()) {
-            String rawPassword = loginRequestDTO.getPassword();
-            String encodedPasswordFromDB = foundUser.get().getPassword();
+            encodedPasswordFromDB = foundUser.get().getPassword();
+        }
 
-            if (passwordEncoder.matches(rawPassword, encodedPasswordFromDB)) {
-                LoginResponseDTO loginResponse = new LoginResponseDTO();
-                String token = jwtService.generateToken(userDetailsService.loadUserByUsername(loginRequestDTO.getUsername()));
-                loginResponse.setToken(token);
-                return loginResponse;
-            }
+        if (foundUserByEmail.isPresent()) {
+            encodedPasswordFromDB = foundUserByEmail.get().getPassword();
+        }
+
+        if (passwordEncoder.matches(rawPassword, encodedPasswordFromDB)) {
+            LoginResponseDTO loginResponse = new LoginResponseDTO();
+            String token = jwtService.generateToken(userDetailsService.loadUserByUsername(loginRequestDTO.getUsername()));
+            loginResponse.setToken(token);
+            return loginResponse;
         }
 
         throw new UserNotFoundException("We couldn't find a user with those credentials. Please try again!");
@@ -97,7 +103,7 @@ public class AuthService {
         }
 
         if (!userPassword.matches("^(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*(),.?\":{}|<>])[A-Za-z\\d!@#$%^&*(),.?\":{}|<>]{8,}$")) {
-            throw new InvalidFormatException("The password must be atleast 8 characters long, contain at least 1 capital letter," +
+            throw new InvalidFormatException("The password must be at least 8 characters long, contain at least 1 capital letter," +
                     " 1 number and 1 special character (!, @, #, $, %, ^, &, *, ., ?)");
         }
     }

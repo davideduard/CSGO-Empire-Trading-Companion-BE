@@ -21,13 +21,22 @@ public class MyUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<UserEntity> user = authRepository.findByUsername(username);
+        Optional<UserEntity> userByEmail = authRepository.findByEmail(username);
+
         if (user.isPresent()) {
             return User.builder()
                     .username(user.get().getUsername())
                     .password(user.get().getPassword())
                     .build();
-        } else {
-            throw new UsernameNotFoundException("username is not available");
         }
+
+        if (userByEmail.isPresent()) {
+            return User.builder()
+                    .username(userByEmail.get().getUsername())
+                    .password(userByEmail.get().getPassword())
+                    .build();
+        }
+
+        throw new UsernameNotFoundException("username is not available");
     }
 }
