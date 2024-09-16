@@ -1,0 +1,13 @@
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+
+
+    <changeSet id="202409161645" author="edi">
+        <addColumn tableName="users">
+            <column name="empire_token" type="varchar(255)">
+            </column>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

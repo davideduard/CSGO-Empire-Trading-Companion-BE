@@ -44,7 +44,7 @@ public class JWTService {
 
     public String extractUsername(String token) {
         Claims claims = getClaims(token);
-        return claims.getSubject();
+        return claims.get("username").toString();
     }
 
     public boolean isTokenValid(String token) {
