@@ -18,7 +18,7 @@ public class JWTService {
 
     @Value("${jwt.secret}")
     private String secret;
-    private static final Long validDuration = TimeUnit.MINUTES.toMillis(30);
+    private static final Long validDuration = TimeUnit.MINUTES.toMillis(300);
 
     private SecretKey generateKey() {
         byte[] decodedKey = Base64.getDecoder().decode(secret);

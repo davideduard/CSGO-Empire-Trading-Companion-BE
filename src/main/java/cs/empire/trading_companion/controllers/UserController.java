@@ -15,8 +15,24 @@ public class UserController {
     }
 
     @GetMapping("/{email}")
-    public ResponseEntity<UserDTO> getUserByEmail(@PathVariable String email) {
-        UserDTO foundUser = this.userService.getUserByEmail(email);
+    public ResponseEntity<UserDTO> getUserByEmail(@PathVariable String email, @RequestHeader("Authorization") String authHeader) {
+        String token = extractToken(authHeader);
+
+        UserDTO foundUser = this.userService.getUserByEmail(email, token);
         return ResponseEntity.ok(foundUser);
+    }
+
+    @PostMapping("/update")
+    public ResponseEntity<UserDTO> updateUser(@RequestParam String email, @RequestHeader("Authorization") String authHeader, @RequestBody UserDTO newUser) {
+        String token = extractToken(authHeader);
+        return ResponseEntity.ok(this.userService.updateUser(email, newUser, token));
+    }
+
+    private String extractToken(String authHeader) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+
+        return null;
     }
 }
