@@ -1,5 +1,6 @@
 package cs.empire.trading_companion.controllers;
 
+import cs.empire.trading_companion.dtos.EmpireTokenDTO;
 import cs.empire.trading_companion.dtos.UserDTO;
 import cs.empire.trading_companion.services.UserService;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,18 @@ public class UserController {
         return ResponseEntity.ok(this.userService.updateUser(email, newUser, token));
     }
 
+    @PostMapping("/set-empire-token")
+    public ResponseEntity<UserDTO> setEmpireToken(@RequestParam String email, @RequestHeader("Authorization") String authHeader, @RequestBody EmpireTokenDTO empireToken) {
+        String authToken = extractToken(authHeader);
+        return ResponseEntity.ok(this.userService.setEmpireToken(email, empireToken, authToken));
+    }
+
+    @PostMapping("/revoke-empire-token")
+    public ResponseEntity<UserDTO> revokeEmpireToken(@RequestParam String email, @RequestHeader("Authorization") String authHeader) {
+        String authToken = extractToken(authHeader);
+        return ResponseEntity.ok(this.userService.revokeEmpireToken(email, authToken));
+    }
+
     private String extractToken(String authHeader) {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             return authHeader.substring(7);
@@ -35,4 +48,5 @@ public class UserController {
 
         return null;
     }
+
 }

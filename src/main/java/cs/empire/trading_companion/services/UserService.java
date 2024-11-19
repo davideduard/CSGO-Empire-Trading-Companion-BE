@@ -1,5 +1,6 @@
 package cs.empire.trading_companion.services;
 
+import cs.empire.trading_companion.dtos.EmpireTokenDTO;
 import cs.empire.trading_companion.dtos.UserDTO;
 import cs.empire.trading_companion.entities.UserEntity;
 import cs.empire.trading_companion.exceptions.InvalidFormatException;
@@ -50,17 +51,7 @@ public class UserService {
 
     public UserDTO updateUser(String email, UserDTO newUserDTO, String token) {
         String currentUser = tokenService.extractUsername(token);
-
-        Optional<UserEntity> foundUser = this.userRepository.findByEmail(email);
-        UserEntity oldUser = null;
-
-        if (foundUser.isPresent()) {
-            oldUser = foundUser.get();
-        }
-
-        if (oldUser == null) {
-            throw new UserNotFoundException("The specified user doesn't exist");
-        }
+        UserEntity oldUser = getUserEntityFromEmail(email);
 
         if (oldUser.getUsername().equals(currentUser)) {
             validateUserDetails(newUserDTO);
@@ -68,7 +59,6 @@ public class UserService {
             oldUser.setEmail(newUserDTO.getEmail());
             oldUser.setFirstName(newUserDTO.getFirstName());
             oldUser.setLastName(newUserDTO.getLastName());
-            oldUser.setEmpireToken(newUserDTO.getEmpireToken());
 
             if (newUserDTO.getPassword() != null) {
                 String encodedPassword = passwordEncoder.encode(newUserDTO.getPassword());
@@ -80,6 +70,48 @@ public class UserService {
         }
 
         throw new UnauthorizedException("Insufficient Permission");
+    }
+
+    public UserDTO setEmpireToken(String email, EmpireTokenDTO empireToken, String authToken) {
+        String currentUser = tokenService.extractUsername(authToken);
+        UserEntity userToModify = getUserEntityFromEmail(email);
+
+        if (userToModify.getUsername().equals(currentUser)) {
+            userToModify.setEmpireToken(empireToken.getToken());
+            this.userRepository.save(userToModify);
+            return this.userMapper.userEntityToUserDto(userToModify);
+        }
+
+        throw new UnauthorizedException("Insufficient Permission");
+    }
+
+    public UserDTO revokeEmpireToken(String email, String authToken) {
+        String currentUser = tokenService.extractUsername(authToken);
+        UserEntity userToRevokeToken = getUserEntityFromEmail(email);
+
+        if (userToRevokeToken.getUsername().equals(currentUser)) {
+            userToRevokeToken.setEmpireToken("");
+            this.userRepository.save(userToRevokeToken);
+
+            return this.userMapper.userEntityToUserDto(userToRevokeToken);
+        }
+
+        throw new UnauthorizedException("Insufficient Permission");
+    }
+
+    private UserEntity getUserEntityFromEmail(String email) {
+        Optional<UserEntity> foundUser = this.userRepository.findByEmail(email);
+        UserEntity foundUserEntity = null;
+
+        if (foundUser.isPresent()) {
+            foundUserEntity = foundUser.get();
+        }
+
+        if (foundUserEntity == null) {
+            throw new UserNotFoundException("The specified user doesn't exist");
+        }
+
+        return foundUserEntity;
     }
 
     private void validateUserDetails(UserDTO userDTO) {
