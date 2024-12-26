@@ -28,10 +28,4 @@ public class GlobalExceptionHandler {
                 .body(exception.getMessage());
     }
 
-    @ExceptionHandler({UnauthorizedException.class})
-    public ResponseEntity<Object> handleUnauthorizedException(UnauthorizedException exception) {
-        return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
-                .body(exception.getMessage());
-    }
 }
