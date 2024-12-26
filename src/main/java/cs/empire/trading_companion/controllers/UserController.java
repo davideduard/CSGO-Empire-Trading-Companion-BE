@@ -15,30 +15,22 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/{email}")
-    public ResponseEntity<UserDTO> getUserByEmail(@PathVariable String email, @RequestHeader("Authorization") String authHeader) {
-        String token = extractToken(authHeader);
-
-        UserDTO foundUser = this.userService.getUserByEmail(email, token);
-        return ResponseEntity.ok(foundUser);
-    }
-
     @PostMapping("/update")
-    public ResponseEntity<UserDTO> updateUser(@RequestParam String email, @RequestHeader("Authorization") String authHeader, @RequestBody UserDTO newUser) {
+    public ResponseEntity<UserDTO> updateUser(@RequestHeader("Authorization") String authHeader, @RequestBody UserDTO newUser) {
         String token = extractToken(authHeader);
-        return ResponseEntity.ok(this.userService.updateUser(email, newUser, token));
+        return ResponseEntity.ok(this.userService.updateUser(newUser, token));
     }
 
     @PostMapping("/set-empire-token")
-    public ResponseEntity<UserDTO> setEmpireToken(@RequestParam String email, @RequestHeader("Authorization") String authHeader, @RequestBody EmpireTokenDTO empireToken) {
+    public ResponseEntity<UserDTO> setEmpireToken(@RequestHeader("Authorization") String authHeader, @RequestBody EmpireTokenDTO empireToken) {
         String authToken = extractToken(authHeader);
-        return ResponseEntity.ok(this.userService.setEmpireToken(email, empireToken, authToken));
+        return ResponseEntity.ok(this.userService.setEmpireToken(empireToken, authToken));
     }
 
     @PostMapping("/revoke-empire-token")
-    public ResponseEntity<UserDTO> revokeEmpireToken(@RequestParam String email, @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<UserDTO> revokeEmpireToken(@RequestHeader("Authorization") String authHeader) {
         String authToken = extractToken(authHeader);
-        return ResponseEntity.ok(this.userService.revokeEmpireToken(email, authToken));
+        return ResponseEntity.ok(this.userService.revokeEmpireToken(authToken));
     }
 
     private String extractToken(String authHeader) {
