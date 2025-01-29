@@ -83,6 +83,30 @@ public class UserService {
         throw new UserNotFoundException("User cannot be found");
     }
 
+    public EmpireTokenDTO getEmpireToken(String authToken) {
+        String currentUser = tokenService.extractUsername(authToken);
+        Optional<UserEntity> user = userRepository.findByUsername(currentUser);
+
+        if (user.isPresent()) {
+            StringBuilder displayToken = new StringBuilder();
+            EmpireTokenDTO empireTokenDTO = new EmpireTokenDTO();
+            String userToken = user.get().getEmpireToken();
+
+            if (userToken == null || userToken.isEmpty()) {
+                empireTokenDTO.setToken("No Empire API Key Found");
+                return empireTokenDTO;
+            }
+
+            displayToken.append(userToken, 0, 4);
+            displayToken.append("*".repeat(28));
+
+            empireTokenDTO.setToken(displayToken.toString());
+            return empireTokenDTO;
+        }
+
+        throw new UserNotFoundException("User cannot be found");
+    }
+
     private void validateUserDetails(UserDTO userDTO) {
         String userEmail = userDTO.getEmail();
         String userPassword = userDTO.getPassword();
