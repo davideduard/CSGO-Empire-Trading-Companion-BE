@@ -33,6 +33,12 @@ public class UserController {
         return ResponseEntity.ok(this.userService.revokeEmpireToken(authToken));
     }
 
+    @GetMapping("/empire-token")
+    public ResponseEntity<EmpireTokenDTO> displayEmpireToken(@RequestHeader("Authorization") String authHeader) {
+        String authToken = extractToken(authHeader);
+        return ResponseEntity.ok(this.userService.getEmpireToken(authToken));
+    }
+
     private String extractToken(String authHeader) {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             return authHeader.substring(7);
